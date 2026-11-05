@@ -1,0 +1,1654 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RIW · ¡A CANVASEAR!</title>
+
+<style>
+:root {
+  font-family: Ubuntu, Arial, sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: #fff9ed;
+  color: #354638;
+}
+header, main, footer {
+  max-width: 850px;
+  margin: auto;
+  padding: 20px;
+}
+header {
+  text-align: center;
+  border-bottom: 3px solid #d98265;
+}
+h1 { color: #355c46; }
+h2 { color: #a85c3e; }
+h3 { color: #355c46; }
+
+.panel {
+  background: #ffffff;
+  padding: 22px;
+  border-radius: 16px;
+  margin: 18px 0;
+  border: 1px solid #e5dcc9;
+  box-shadow: 0 4px 14px #66553312;
+}
+button {
+  background: #f5d68b;
+  color: #493b24;
+  border: 1px solid #c8a95f;
+  border-radius: 10px;
+  padding: 12px 16px;
+  margin: 5px;
+  cursor: pointer;
+  font-weight: bold;
+}
+button:hover:not(:disabled) { filter: brightness(.96); }
+button:focus-visible, textarea:focus-visible {
+  outline: 3px solid #355c46;
+  outline-offset: 2px;
+}
+button:disabled { opacity: .55; cursor: default; }
+
+.opcion {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: #f7f2e8;
+  color: #354638;
+  border-color: #dfd4c0;
+}
+.opcion.correcta {
+  background: #d7ebd7;
+  color: #20502f;
+  border-color: #568a60;
+}
+.opcion.incorrecta {
+  background: #f8dcd5;
+  color: #842e24;
+  border-color: #c77766;
+}
+textarea {
+  width: 100%;
+  min-height: 90px;
+  background: #fffdf8;
+  color: #354638;
+  border: 1px solid #9baf9d;
+  border-radius: 8px;
+  padding: 12px;
+  font: inherit;
+}
+.visual {
+  font-size: 52px;
+  text-align: center;
+  padding: 22px;
+  background: #e5eedc;
+  border-radius: 12px;
+  letter-spacing: 12px;
+}
+small { color: #79684e; }
+#resultado { font-weight: bold; margin-top: 15px; }
+
+@media print {
+  body { background: white; color: black; }
+  header, .juego, button { display: none !important; }
+  .panel { background: white; color: black; box-shadow: none; }
+  textarea { color: black; background: white; }
+}
+
+.logo-riw {
+  display: block;
+  width: min(100%, 340px);
+  height: auto;
+  margin: 0 auto 14px;
+  object-fit: contain;
+}
+@media print {
+  .logo-riw { display: none; }
+}
+
+/* RIW · Ajuste de identidad corporativa */
+header .logo-riw {
+    width: min(50%, 170px);
+    height: auto;
+    margin: 0 auto 12px 0;
+    display: block;
+    object-fit: contain;
+}
+
+
+/* RIW · Diseño adaptable v0.3.1 */
+#pestanas-movil { display: none; }
+
+@media (max-width: 600px) {
+  header {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 10px 12px;
+    text-align: left;
+  }
+  header .logo-riw {
+    width: 86px;
+    max-width: 86px;
+    margin: 0;
+    flex-shrink: 0;
+  }
+  header h1 {
+    flex: 1;
+    font-size: 1.05rem;
+    line-height: 1.2;
+    margin: 0;
+    min-width: 0;
+  }
+  header p, header small { display: none; }
+
+  #pestanas-movil {
+    display: flex;
+    gap: 8px;
+    padding: 10px 12px 0;
+  }
+  .pestana {
+    flex: 1;
+    margin: 0;
+    padding: 10px 6px;
+    font-size: .9rem;
+    background: #e5eedc;
+    color: #355c46;
+  }
+  .pestana.activa {
+    background: #355c46;
+    color: white;
+  }
+  main { padding: 8px 12px 16px; }
+
+  .panel {
+    margin: 8px 0;
+    padding: 14px;
+    border-radius: 13px;
+  }
+  h2 { font-size: 1.2rem; margin: 4px 0 8px; }
+  h3 { font-size: 1rem; line-height: 1.3; }
+
+  .visual {
+    font-size: 34px;
+    padding: 9px;
+    letter-spacing: 4px;
+  }
+  .opcion {
+    padding: 10px;
+    margin: 3px 0;
+    font-size: .92rem;
+    line-height: 1.25;
+  }
+  #resultado { font-size: .9rem; }
+
+  #contenido-principal[data-vista="juego"] #seccion-canvas {
+    display: none;
+  }
+  #contenido-principal[data-vista="canvas"] #seccion-juego {
+    display: none;
+  }
+  footer { padding: 8px 12px; }
+}
+
+@media print {
+  #pestanas-movil { display: none !important; }
+  #seccion-canvas { display: block !important; }
+  #seccion-juego { display: none !important; }
+}
+
+
+/* RIW · Compactación móvil v0.3.2 */
+@media screen and (max-width: 600px) {
+
+  /* La cabecera deja espacio al juego */
+  body > header {
+    display: none;
+  }
+
+  /* Navegación compacta y accesible */
+  #pestanas-movil {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: #fff9ed;
+    padding: 5px 7px;
+    gap: 5px;
+    border-bottom: 1px solid #e5dcc9;
+  }
+
+  .pestana {
+    min-height: 44px;
+    padding: 7px 5px;
+    font-size: .82rem;
+    border-radius: 8px;
+  }
+
+  /* Reducir el espacio exterior */
+  main {
+    padding: 5px 7px 10px;
+  }
+
+  .panel {
+    margin: 4px 0;
+    padding: 10px;
+    border-radius: 10px;
+  }
+
+  /* Tipografía ligeramente más compacta */
+  h2 {
+    font-size: 1.08rem;
+    line-height: 1.2;
+    margin: 2px 0 5px;
+  }
+
+  h3 {
+    font-size: .92rem;
+    line-height: 1.25;
+    margin: 8px 0;
+  }
+
+  p {
+    margin: 6px 0;
+    line-height: 1.3;
+  }
+
+  #contador {
+    font-size: .78rem;
+    margin: 3px 0 6px;
+  }
+
+  /* Ilustraciones sin exceso de aire */
+  .visual {
+    font-size: 29px;
+    line-height: 1.1;
+    letter-spacing: 0;
+    padding: 5px 8px;
+    margin: 5px 0;
+    border-radius: 8px;
+  }
+
+  /* Respuestas compactas pero táctiles */
+  .opcion {
+    min-height: 44px;
+    padding: 7px 9px;
+    margin: 2px 0;
+    font-size: .84rem;
+    line-height: 1.2;
+    border-radius: 8px;
+  }
+
+  #resultado {
+    font-size: .82rem;
+    line-height: 1.3;
+    margin: 7px 0;
+  }
+
+  #siguiente {
+    min-height: 44px;
+    padding: 8px 12px;
+    font-size: .84rem;
+  }
+
+  #seccion-canvas textarea {
+    min-height: 72px;
+    font-size: .88rem;
+  }
+
+  footer {
+    padding: 5px 8px;
+    font-size: .75rem;
+  }
+}
+
+/* La cabecera permanece disponible en escritorio */
+@media screen and (min-width: 601px) {
+  body > header {
+    display: block;
+  }
+}
+
+
+/* RIW-INTRO-CANVAS-033 */
+body:not(.iniciado) > header,
+body:not(.iniciado) > main,
+body:not(.iniciado) > nav,
+body:not(.iniciado) > footer {
+  display: none !important;
+}
+body.iniciado #bienvenida {
+  display: none;
+}
+#bienvenida {
+  min-height: 100dvh;
+  max-width: 700px;
+  margin: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 12px;
+  text-align: center;
+}
+#bienvenida img {
+  width: min(70%, 240px);
+  height: auto;
+  margin: 0 auto;
+}
+#bienvenida h1 {
+  margin: 0;
+  font-size: clamp(1.4rem, 6vw, 2rem);
+}
+#bienvenida p {
+  margin: 0;
+}
+#intro-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 7px;
+  margin: 10px 0;
+}
+.intro-tile {
+  min-height: 72px;
+  padding: 10px 5px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid #d5c6aa;
+  border-radius: 12px;
+  background: #fff;
+  color: #355c46;
+  font-size: .72rem;
+  line-height: 1.15;
+  overflow-wrap: anywhere;
+  animation: volar .75s both, colorear .6s both;
+  animation-delay: var(--vuelo), var(--color);
+}
+.intro-tile span {
+  font-size: 1.4rem;
+}
+@keyframes volar {
+  from {
+    opacity: 0;
+    transform: translate(var(--x), var(--y)) rotate(var(--r)) scale(.65);
+  }
+  to {
+    opacity: 1;
+    transform: translate(0, 0) rotate(0) scale(1);
+  }
+}
+@keyframes colorear {
+  from { background: #fff; }
+  to { background: var(--fondo); }
+}
+#intro-iniciar {
+  background: #355c46;
+  color: white;
+  border-color: #355c46;
+  min-height: 48px;
+  width: 100%;
+  max-width: 320px;
+  margin: 4px auto;
+}
+#intro-saltar {
+  background: transparent;
+  border: none;
+  color: #355c46;
+  text-decoration: underline;
+}
+@media (max-width: 360px) {
+  #bienvenida { padding: 10px; gap: 7px; }
+  #bienvenida img { width: 125px; }
+  .intro-tile { min-height: 56px; padding: 5px 3px; font-size: .65rem; }
+  .intro-tile span { font-size: 1.1rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .intro-tile { animation: none; background: var(--fondo); }
+}
+@media print {
+  #bienvenida { display: none !important; }
+}
+
+
+/* RIW-CANVAS-REAL-034 */
+
+#intro-grid {
+  display: grid;
+  grid-template-columns: repeat(10, minmax(0, 1fr));
+  grid-template-rows: 90px 90px 65px;
+  gap: 5px;
+  margin: 8px 0;
+  overflow: visible;
+  isolation: isolate;
+}
+
+#intro-grid .intro-tile {
+  min-width: 0;
+  min-height: 0;
+  padding: 5px 2px;
+  margin: 0;
+  border: 0;
+  border-radius: 7px;
+  color: white;
+  font-size: .65rem;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: 0;
+  box-shadow: 0 2px 5px #0002;
+  background: var(--tono);
+  animation:
+    riwLlegada 1.2s cubic-bezier(.2,.8,.2,1) both,
+    riwRespirar 5s ease-in-out 3.2s infinite;
+  animation-delay:
+    var(--vuelo),
+    3.2s;
+}
+
+#intro-grid .intro-tile span {
+  font-size: 1.1rem;
+}
+
+/* Distribución fiel al Canvas proporcionado */
+#intro-grid .intro-tile:nth-child(8) {
+  grid-area: 1 / 1 / 3 / 3;
+  --tono: #65358d;
+}
+#intro-grid .intro-tile:nth-child(7) {
+  grid-area: 1 / 3 / 2 / 5;
+  --tono: #df901d;
+}
+#intro-grid .intro-tile:nth-child(6) {
+  grid-area: 2 / 3 / 3 / 5;
+  --tono: #dd6538;
+}
+#intro-grid .intro-tile:nth-child(2) {
+  grid-area: 1 / 5 / 3 / 7;
+  --tono: #388b43;
+}
+#intro-grid .intro-tile:nth-child(4) {
+  grid-area: 1 / 7 / 2 / 9;
+  --tono: #8eaf28;
+}
+#intro-grid .intro-tile:nth-child(3) {
+  grid-area: 2 / 7 / 3 / 9;
+  --tono: #159a99;
+}
+#intro-grid .intro-tile:nth-child(1) {
+  grid-area: 1 / 9 / 3 / 11;
+  --tono: #1693b2;
+}
+#intro-grid .intro-tile:nth-child(9) {
+  grid-area: 3 / 1 / 4 / 6;
+  --tono: #485fa1;
+}
+#intro-grid .intro-tile:nth-child(5) {
+  grid-area: 3 / 6 / 4 / 11;
+  --tono: #276f83;
+}
+
+@keyframes riwLlegada {
+  0% {
+    opacity: 0;
+    transform: translate(
+      var(--x),
+      var(--y)
+    ) rotate(var(--r)) scale(.35);
+  }
+  55% {
+    opacity: 1;
+    transform: translate(0,0) scale(1.12);
+  }
+  78% {
+    transform: translate(0,0) scale(.94);
+  }
+  100% {
+    opacity: 1;
+    transform: translate(0,0) scale(1);
+  }
+}
+
+@keyframes riwRespirar {
+  0%, 85%, 100% {
+    transform: scale(1);
+  }
+  91% {
+    transform: scale(1.035);
+  }
+}
+
+@media (max-width: 600px) {
+  #intro-grid {
+    grid-template-rows: 75px 75px 55px;
+    gap: 3px;
+  }
+  #intro-grid .intro-tile {
+    font-size: .52rem;
+    padding: 3px 1px;
+    border-radius: 5px;
+  }
+  #intro-grid .intro-tile span {
+    font-size: .95rem;
+  }
+}
+
+@media (max-width: 360px) {
+  #intro-grid {
+    grid-template-rows: 65px 65px 48px;
+  }
+  #intro-grid .intro-tile {
+    font-size: .49rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #intro-grid .intro-tile {
+    animation: none !important;
+  }
+}
+
+
+/* RIW-PREGUNTA-LATERAL-035 */
+.pregunta-fila {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 8px 0;
+}
+.pregunta-fila #visual:empty {
+  display: none;
+}
+.pregunta-fila #visual:not(:empty) {
+  flex: 0 0 26%;
+  max-width: 115px;
+}
+.pregunta-fila .visual {
+  margin: 0;
+  padding: 8px 3px;
+  letter-spacing: 0;
+  font-size: 27px;
+  line-height: 1.2;
+}
+.pregunta-fila #pregunta {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  line-height: 1.25;
+}
+@media (max-width: 600px) {
+  .pregunta-fila {
+    gap: 7px;
+    margin: 5px 0;
+  }
+  .pregunta-fila #visual:not(:empty) {
+    flex-basis: 27%;
+  }
+  .pregunta-fila .visual {
+    padding: 6px 2px;
+    font-size: 22px;
+    overflow-wrap: anywhere;
+  }
+  .pregunta-fila #pregunta {
+    font-size: .88rem;
+    line-height: 1.23;
+  }
+  #seccion-juego .panel {
+    padding: 8px;
+  }
+}
+
+
+/* RIW-NAVEGACION-ESTABLE-036 */
+
+/* Las respuestas ocupan una zona consistente */
+#seccion-juego #opciones {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 5px;
+}
+
+#seccion-juego .opcion {
+  margin: 0;
+  min-height: 43px;
+  overflow-wrap: anywhere;
+}
+
+/* Espacio reservado para la explicación */
+#seccion-juego #resultado {
+  min-height: 4.5em;
+  margin: 8px 0;
+  line-height: 1.35;
+}
+
+/* Botón de avance siempre a todo el ancho */
+#seccion-juego #siguiente {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  margin: 4px 0 0;
+}
+
+/* Evitar barras de desplazamiento dentro del juego */
+#seccion-juego,
+#seccion-juego #opciones,
+#seccion-juego .pregunta-fila {
+  overflow: visible;
+}
+
+@media screen and (max-width: 600px) {
+  #seccion-juego #opciones {
+    gap: 4px;
+  }
+
+  #seccion-juego .opcion {
+    padding: 8px 10px;
+    min-height: 40px;
+    font-size: .86rem;
+    line-height: 1.2;
+  }
+
+  #seccion-juego #resultado {
+    min-height: 4.8em;
+    font-size: .82rem;
+    line-height: 1.25;
+  }
+
+  #seccion-juego #siguiente {
+    min-height: 42px;
+  }
+}
+
+/* RIW-SALTO-EXPLICACION-0371 */
+#resultado {
+  white-space: pre-line;
+}
+
+/* RIW-INTRO-HORIZONTAL-041 */
+
+/* Pantallas horizontales con poca altura */
+@media screen and (orientation: landscape) and (max-height: 500px) {
+
+  #bienvenida {
+    min-height: 100dvh;
+    height: auto;
+    justify-content: flex-start;
+    gap: 4px;
+    padding: 6px 12px 10px;
+  }
+
+  #bienvenida img {
+    width: min(35%, 125px);
+    max-height: 42px;
+    object-fit: contain;
+    margin: 0 auto;
+  }
+
+  #bienvenida h1 {
+    font-size: 1.2rem;
+    line-height: 1.1;
+    margin: 0;
+  }
+
+  #bienvenida p {
+    font-size: .82rem;
+    line-height: 1.15;
+    margin: 0;
+  }
+
+  #intro-grid {
+    grid-template-rows: 40px 40px 30px;
+    gap: 3px;
+    margin: 3px 0;
+  }
+
+  #intro-grid .intro-tile {
+    padding: 1px;
+    font-size: .48rem;
+    line-height: 1;
+  }
+
+  #intro-grid .intro-tile span {
+    font-size: .72rem;
+  }
+
+  #intro-iniciar {
+    min-height: 34px;
+    padding: 5px 10px;
+    margin: 1px auto;
+    font-size: .85rem;
+  }
+
+  #intro-saltar {
+    min-height: 25px;
+    padding: 2px 6px;
+    margin: 0 auto;
+    font-size: .75rem;
+  }
+
+  #bienvenida small {
+    font-size: .65rem;
+    line-height: 1.1;
+  }
+}
+
+/* Ajuste adicional para móviles horizontales muy bajos */
+@media screen and (orientation: landscape) and (max-height: 350px) {
+
+  #bienvenida {
+    gap: 2px;
+    padding-top: 4px;
+    padding-bottom: 5px;
+  }
+
+  #bienvenida img {
+    max-height: 32px;
+  }
+
+  #intro-grid {
+    grid-template-rows: 32px 32px 24px;
+    gap: 2px;
+    margin: 2px 0;
+  }
+
+  #intro-grid .intro-tile span {
+    font-size: .62rem;
+  }
+
+  #bienvenida h1 {
+    font-size: 1.05rem;
+  }
+
+  #bienvenida p {
+    font-size: .75rem;
+  }
+}
+
+
+/* RIW-JUEGO-HORIZONTAL-042 */
+
+@media screen and (orientation: landscape) and (max-height: 500px) {
+
+  #pestanas-movil {
+    padding: 4px 8px 0;
+    gap: 6px;
+  }
+
+  #pestanas-movil .pestana {
+    padding: 5px;
+    min-height: 34px;
+    font-size: .78rem;
+  }
+
+  main {
+    padding: 4px 8px 8px;
+  }
+
+  #seccion-juego {
+    padding: 8px 10px;
+    margin: 4px 0;
+  }
+
+  #seccion-juego #bloque {
+    font-size: 1rem;
+    margin: 0 0 2px;
+  }
+
+  #seccion-juego #contador {
+    font-size: .72rem;
+    margin: 0 0 4px;
+  }
+
+  #seccion-juego .pregunta-fila {
+    gap: 7px;
+    margin: 3px 0 6px;
+  }
+
+  #seccion-juego .pregunta-fila #visual:not(:empty) {
+    flex: 0 0 18%;
+    max-width: 85px;
+  }
+
+  #seccion-juego .pregunta-fila .visual {
+    padding: 4px 2px;
+    font-size: 18px;
+  }
+
+  #seccion-juego #pregunta {
+    font-size: .82rem;
+    line-height: 1.2;
+  }
+
+  #seccion-juego #opciones {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 5px;
+  }
+
+  #seccion-juego .opcion {
+    min-width: 0;
+    min-height: 42px;
+    padding: 5px 7px;
+    margin: 0;
+    font-size: .75rem;
+    line-height: 1.18;
+    overflow-wrap: anywhere;
+  }
+
+  #seccion-juego #resultado {
+    min-height: 0;
+    margin: 5px 0;
+    font-size: .75rem;
+    line-height: 1.2;
+  }
+
+  #seccion-juego #resultado:empty {
+    display: none;
+  }
+
+  #seccion-juego #siguiente {
+    min-height: 38px;
+    padding: 5px 8px;
+    margin: 5px 0 0;
+    font-size: .8rem;
+  }
+}
+
+
+/* RIW-NAVEGACION-CONTEXTUAL-043 */
+
+#pestanas-movil {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 5px 12px 0;
+  gap: 0;
+}
+
+#pestanas-movil button {
+  flex: 0 0 auto;
+  width: auto;
+  min-height: 44px;
+  padding: 7px 14px;
+  margin: 0;
+  border-radius: 22px;
+  font-size: .85rem;
+  background: #e5eedc;
+  color: #355c46;
+  border: 1px solid #b6c9b2;
+}
+
+#volver-juego {
+  display: none;
+}
+
+#contenido-principal[data-vista="canvas"] ~ * {
+  /* La vista se controla mediante la clase del body. */
+}
+
+body.vista-canvas #ir-canvas {
+  display: none;
+}
+
+body.vista-canvas #volver-juego {
+  display: inline-block;
+}
+
+body:not(.vista-canvas) #volver-juego {
+  display: none;
+}
+
+body.respuesta-completada #ir-canvas {
+  background: #d8ead2;
+  border-color: #8eaf85;
+  animation: riwInvitacion .45s ease-out;
+}
+
+@keyframes riwInvitacion {
+  from { opacity: .55; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media screen and (orientation: landscape)
+       and (max-height: 500px) {
+  #pestanas-movil {
+    padding: 2px 8px 0;
+  }
+  #pestanas-movil button {
+    min-height: 36px;
+    padding: 4px 12px;
+    font-size: .76rem;
+  }
+}
+
+@media print {
+  #pestanas-movil {
+    display: none !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  body.respuesta-completada #ir-canvas {
+    animation: none;
+  }
+}
+
+
+/* RIW-NOTAS-APRENDIZAJE-044 */
+#guardar-aprendizaje {
+  display:block;
+  width:fit-content;
+  max-width:100%;
+  min-height:44px;
+  margin:8px 0;
+  padding:9px 15px;
+  border-radius:22px;
+  background:#e5eedc;
+  color:#355c46;
+  border:1px solid #a6c39c;
+  font-size:.85rem;
+  cursor:pointer;
+}
+#guardar-aprendizaje:disabled {
+  opacity:.8;
+  cursor:default;
+}
+.riw-notas {
+  margin:12px 0 20px;
+  padding:12px;
+  background:#f8f5ed;
+  border:1px solid #ded6c5;
+  border-radius:12px;
+}
+.riw-notas h4 {
+  margin:0 0 8px;
+  color:#355c46;
+}
+.riw-nota {
+  padding:10px;
+  margin:8px 0;
+  background:white;
+  border:1px solid #e2ddcf;
+  border-radius:9px;
+}
+.riw-nota label {
+  display:block;
+  margin-bottom:5px;
+  font-size:.8rem;
+  color:#526d55;
+}
+.riw-nota textarea {
+  display:block;
+  width:100%;
+  min-height:95px;
+  box-sizing:border-box;
+}
+.riw-eliminar-nota {
+  display:block;
+  margin-top:7px;
+  min-height:40px;
+  padding:7px 12px;
+  font-size:.8rem;
+}
+.riw-notas-vacias {
+  font-size:.85rem;
+  color:#766c5a;
+}
+@media print {
+  #guardar-aprendizaje,
+  .riw-eliminar-nota {
+    display:none !important;
+  }
+}
+
+
+/* RIW-DOMINO-RESPONSIVE-045 */
+
+/* Distribución adaptable del juego */
+#seccion-juego {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  gap: clamp(4px, 1vh, 10px);
+}
+
+#seccion-juego > * {
+  min-width: 0;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+#seccion-juego #bloque {
+  font-size: clamp(1rem, 2.4vw, 1.3rem);
+  line-height: 1.2;
+}
+
+#seccion-juego #contador {
+  font-size: .8rem;
+}
+
+#seccion-juego .pregunta-fila {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+#seccion-juego .pregunta-fila #visual:not(:empty) {
+  flex: 0 0 auto;
+  width: clamp(48px, 16%, 90px);
+  max-width: 90px;
+}
+
+#seccion-juego .pregunta-fila .visual {
+  font-size: clamp(18px, 3vw, 27px);
+  line-height: 1.1;
+  padding: 6px 2px;
+  margin: 0;
+}
+
+#seccion-juego #pregunta {
+  flex: 1;
+  min-width: 0;
+  font-size: clamp(.88rem, 1.8vw, 1.08rem);
+  line-height: 1.3;
+  margin: 0;
+}
+
+#seccion-juego #opciones {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 5px;
+}
+
+#seccion-juego .opcion {
+  width: 100%;
+  min-width: 0;
+  min-height: 44px;
+  padding: 8px 10px;
+  margin: 0;
+  line-height: 1.25;
+  overflow-wrap: break-word;
+}
+
+#seccion-juego #resultado {
+  min-height: 0;
+  margin: 0;
+  line-height: 1.3;
+  white-space: pre-line;
+}
+
+#seccion-juego #resultado:empty {
+  display: none;
+}
+
+#seccion-juego #guardar-aprendizaje {
+  width: 100%;
+  min-height: 44px;
+  margin: 0;
+  padding: 7px 10px;
+}
+
+#seccion-juego #siguiente {
+  width: 100%;
+  min-height: 44px;
+  margin: 0;
+  padding: 7px 10px;
+}
+
+/* Tras responder: conservar visible la opción correcta */
+body.respuesta-completada
+#seccion-juego #opciones .opcion:not(.correcta) {
+  display: none;
+}
+
+/* Dos columnas para respuestas cuando hay anchura */
+@media screen and (min-width: 420px) {
+  #seccion-juego #opciones {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* Controles finales en paralelo después de responder */
+@media screen and (min-width: 420px) {
+  body.respuesta-completada #seccion-juego {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  body.respuesta-completada #seccion-juego
+  > :not(#guardar-aprendizaje):not(#siguiente) {
+    grid-column: 1 / -1;
+  }
+
+  body.respuesta-completada
+  #seccion-juego #guardar-aprendizaje {
+    grid-column: 1;
+  }
+
+  body.respuesta-completada
+  #seccion-juego #siguiente {
+    grid-column: 2;
+  }
+
+  body.respuesta-completada
+  #seccion-juego #siguiente:only-of-type {
+    grid-column: 1 / -1;
+  }
+}
+
+/* Móviles: reducir espacios antes que texto */
+@media screen and (max-width: 600px) {
+  #pestanas-movil {
+    padding: 3px 8px;
+  }
+
+  #pestanas-movil button {
+    margin: 0;
+    min-height: 44px;
+    padding: 6px 12px;
+  }
+
+  main {
+    padding: 4px 7px 10px;
+  }
+
+  #seccion-juego {
+    padding: 9px;
+    margin: 3px 0;
+    gap: 5px;
+  }
+
+  #seccion-juego #contador {
+    font-size: .75rem;
+  }
+
+  #seccion-juego .opcion {
+    font-size: .84rem;
+  }
+
+  #seccion-juego #resultado {
+    font-size: .82rem;
+  }
+}
+
+/* Pantallas horizontales de poca altura */
+@media screen and (orientation: landscape)
+       and (max-height: 500px) {
+  #pestanas-movil {
+    padding: 2px 8px;
+  }
+
+  #pestanas-movil button {
+    min-height: 40px;
+  }
+
+  main {
+    padding: 3px 7px 7px;
+  }
+
+  #seccion-juego {
+    padding: 6px 9px;
+    gap: 4px;
+  }
+
+  #seccion-juego #bloque {
+    font-size: 1rem;
+  }
+
+  #seccion-juego #contador {
+    font-size: .72rem;
+  }
+
+  #seccion-juego #pregunta {
+    font-size: .84rem;
+    line-height: 1.22;
+  }
+
+  #seccion-juego #opciones {
+    gap: 4px;
+  }
+
+  #seccion-juego .opcion {
+    min-height: 40px;
+    padding: 5px 7px;
+    font-size: .78rem;
+    line-height: 1.2;
+  }
+
+  #seccion-juego #resultado {
+    font-size: .78rem;
+    line-height: 1.22;
+  }
+
+  #seccion-juego #guardar-aprendizaje,
+  #seccion-juego #siguiente {
+    min-height: 40px;
+    padding: 5px 7px;
+    font-size: .78rem;
+  }
+}
+
+/* Los campos de escritura necesitan espacio real */
+#seccion-canvas textarea {
+  max-width: 100%;
+  resize: vertical;
+}
+
+/* Accesibilidad: nunca recortar contenido */
+#seccion-juego,
+#seccion-juego #opciones,
+#seccion-juego #resultado {
+  overflow: visible;
+}
+
+</style>
+
+</head>
+<body>
+
+<section id="bienvenida" aria-label="Bienvenida a RIW ¡A CANVASEAR!">
+  <img src="assets/riw-logo-oficial.png"
+       alt="Logotipo oficial Rhynus Interactive Works">
+  <h1>¡A CANVASEAR!</h1>
+  <p>¡Dale forma a tu idea de negocio!</p>
+  <div id="intro-grid" aria-label="Los nueve bloques del Canvas"></div>
+  <button id="intro-iniciar" type="button">¡Comenzar partida!</button>
+  <button id="intro-saltar" type="button">Saltar animación</button>
+  <small>9 desafíos · Un Canvas para tu proyecto</small>
+</section>
+
+<header>
+<img class="logo-riw" src="assets/riw-logo-oficial.png" alt="Logotipo oficial de RIW · Rhynus Interactive Works">
+<h1>RIW · ¡A CANVASEAR!</h1>
+<p>Aprende los nueve bloques de tu modelo de negocio</p>
+<small>Piloto local v0.3 · Sin conexión · Sin cuentas</small>
+</header>
+
+<!-- RIW-NAVEGACION-CONTEXTUAL-043 -->
+<nav id="pestanas-movil" aria-label="Navegación contextual">
+  <button type="button" id="ir-canvas"
+          onclick="cambiarVista('canvas')">
+    📝 Mi Canvas
+  </button>
+  <button type="button" id="volver-juego"
+          onclick="cambiarVista('juego')">
+    ← Volver al juego
+  </button>
+</nav>
+<main id="contenido-principal" data-vista="juego">
+<section class="panel juego" id="seccion-juego">
+<h2 id="bloque">Preparando partida</h2>
+<p id="contador"></p>
+<div class="pregunta-fila">
+<div id="visual"></div>
+<h3 id="pregunta"></h3>
+</div>
+<div id="opciones"></div>
+<p id="resultado" aria-live="polite"></p>
+<button id="siguiente" onclick="avanzar()" disabled>Siguiente desafío</button>
+</section>
+
+<section class="panel" id="seccion-canvas">
+<h2>Mi Business Model Canvas</h2>
+<p>Escribe tus propias ideas. Se guardan en este navegador.</p>
+<div id="canvas"></div>
+<button onclick="window.print()">Imprimir / Guardar como PDF</button>
+<button onclick="exportar()">Exportar mis respuestas JSON</button>
+</section>
+</main>
+<footer><small>RIW · Piloto educativo individual. Sin sincronización multijugador.</small></footer>
+<script>
+"use strict";
+/* RIW-BANCO-PRACTICO-040 */
+const bancoPractico=[[["Segmentos de clientes","Una academia quiere enseñar informática a mayores. ¿A quién debe entrevistar primero?",["A fabricantes de ordenadores","A personas mayores interesadas","A cualquier turista","Solo a proveedores"],1,"👵 💻","Hay que conocer las necesidades de quienes usarán el servicio."],["Segmentos de clientes","Una peluquera a domicilio recibe muchas consultas de personas con movilidad reducida. ¿Qué conviene hacer?",["Ignorar las consultas","Comprar otro local","Estudiar ese grupo de clientes","Atender solo a familiares"],2,"✂️ 🏠","Un grupo con necesidades concretas puede ser un segmento importante."],["Segmentos de clientes","Una aplicación para agricultores pequeños tiene pocos usuarios. ¿Qué debería investigar?",["El color del logotipo","Qué agricultores necesitan realmente la solución","El precio de una oficina","La música publicitaria"],1,"🌱 📱","Conviene definir clientes por necesidades, no solo por profesión."],["Segmentos de clientes","Un taller infantil quiere ampliar su oferta. ¿Cuál es el primer paso?",["Comprar veinte mesas","Elegir una red social","Identificar edades y necesidades de las familias","Alquilar otro edificio"],2,"🎨 👨‍👩‍👧","Conocer a las familias ayuda a diseñar una oferta adecuada."],["Segmentos de clientes","Una consultora recibe peticiones de autónomos y grandes empresas. ¿Qué debería hacer?",["Ofrecer exactamente lo mismo a todos","Comparar sus necesidades y separar segmentos","Rechazar a los autónomos","Duplicar los precios"],1,"📊 🤝","Distintos clientes pueden necesitar propuestas diferentes."]],[["Propuesta de valor","Una tienda de barrio pierde ventas frente a grandes cadenas. ¿Cómo puede diferenciarse?",["Copiar todos sus productos","Ofrecer asesoramiento cercano y especializado","Cerrar antes","Eliminar las devoluciones"],1,"🏪 💡","La atención especializada puede aportar un valor diferencial."],["Propuesta de valor","Una empresa entrega comida saludable a trabajadores sin tiempo. ¿Qué valor ofrece?",["Más trámites","Comodidad y alimentación adaptada","Una cocina más grande","Más publicidad"],1,"🥗 🚲","El valor está en resolver una necesidad del cliente."],["Propuesta de valor","Un diccionario digital permite escuchar pronunciaciones. ¿Qué mejora aporta?",["Más gastos administrativos","Aprendizaje práctico de la pronunciación","Un almacén adicional","Menos idiomas disponibles"],1,"📖 🔊","Una función útil puede diferenciar el producto."],["Propuesta de valor","Un servicio de reparación recoge los aparatos en casa. ¿Qué está ofreciendo?",["Solo transporte","Comodidad y ahorro de tiempo","Más impuestos","Una factura diferente"],1,"🔧 🏠","La facilidad de uso también forma parte del valor."],["Propuesta de valor","Una academia promete aprobar cualquier examen. ¿Qué propuesta sería más responsable?",["Garantizar resultados imposibles","Ocultar sus métodos","Ofrecer seguimiento y enseñanza personalizada","Evitar evaluaciones"],2,"🎓 💡","Una propuesta creíble explica beneficios que puede cumplir."]],[["Canales","Una panadería quiere vender por encargo en su barrio. ¿Qué canal puede probar?",["Un formulario sencillo por móvil","Una nave industrial","Una nueva máquina","Un préstamo"],0,"🥖 📱","El canal facilita que el cliente haga su pedido."],["Canales","Un artesano tiene productos excelentes, pero nadie los conoce. ¿Qué debería probar?",["Guardar todo en cajas","Mostrar su trabajo en mercados y redes","Cambiar de contable","Comprar más herramientas"],1,"🧶 📣","Los canales ayudan a dar a conocer y entregar la oferta."],["Canales","Una academia recibe consultas por Instagram, pero pierde matrículas. ¿Qué conviene mejorar?",["Solo el logotipo","El paso de consulta a inscripción","El mobiliario","El nombre del profesor"],1,"📱 📝","Un canal debe facilitar también la conversión."],["Canales","Una empresa vende a personas que no usan redes sociales. ¿Qué canal puede añadir?",["Solo vídeos virales","Atención telefónica o presencial","Más anuncios digitales","Una contraseña compleja"],1,"☎️ 🏪","El canal debe adaptarse a los hábitos del cliente."],["Canales","Una librería recibe pedidos en su web, pero entrega tarde. ¿Qué necesita revisar?",["La tipografía","El proceso de distribución","El nombre comercial","Las fotografías del equipo"],1,"📚 🚚","La entrega también forma parte de los canales."]],[["Relaciones con clientes","Tras un curso, los alumnos siguen teniendo dudas. ¿Qué debería ofrecer la academia?",["Silencio absoluto","Un canal de seguimiento","Más publicidad sin ayuda","Cerrar las consultas"],1,"🎓 🤝","El acompañamiento puede fortalecer la relación."],["Relaciones con clientes","Una tienda recibe una reclamación justificada. ¿Qué respuesta ayuda más?",["Ignorarla","Discutir públicamente","Escuchar y ofrecer una solución razonable","Eliminar al cliente"],2,"🛍️ 💬","Resolver incidencias con respeto favorece la confianza."],["Relaciones con clientes","Una peluquería quiere fidelizar clientes sin saturarlos. ¿Qué puede hacer?",["Enviar mensajes diarios","Ofrecer recordatorios con consentimiento","Llamar de madrugada","Compartir sus teléfonos"],1,"✂️ 📅","Una relación útil respeta las preferencias y la privacidad."],["Relaciones con clientes","Una plataforma detecta que muchos usuarios abandonan. ¿Qué debería investigar?",["Solo el color de la web","Las dificultades que encuentran","El sueldo de otra empresa","El precio de la electricidad"],1,"💻 🔍","Escuchar a los usuarios ayuda a mejorar la experiencia."],["Relaciones con clientes","Un cliente agradece una atención especialmente buena. ¿Qué conviene hacer?",["Exigir una reseña","Agradecer y mantener el buen servicio","Subirle el precio sin aviso","Publicar sus datos"],1,"😊 🤝","Las relaciones duraderas se construyen con confianza."]],[["Fuentes de ingresos","Una academia cobra una cuota mensual por sus clases. ¿Qué modelo utiliza?",["Suscripción o cuota recurrente","Donación obligatoria","Venta de maquinaria","Alquiler de oficinas"],0,"💶 📅","Las cuotas periódicas generan ingresos recurrentes."],["Fuentes de ingresos","Una diseñadora cobra por cada logotipo entregado. ¿De dónde proceden sus ingresos?",["De una subvención automática","De vender servicios por proyecto","Del alquiler del local","De comprar equipos"],1,"🎨 💶","El pago por proyecto es una fuente de ingresos."],["Fuentes de ingresos","Una aplicación gratuita ofrece funciones avanzadas de pago. ¿Qué modelo prueba?",["Pago por residuos","Freemium","Alquiler de maquinaria","Trueque obligatorio"],1,"📱 ⭐","Freemium combina acceso básico gratuito y funciones de pago."],["Fuentes de ingresos","Un restaurante vende menús y también organiza talleres de cocina. ¿Qué consigue?",["Eliminar costes","Diversificar fuentes de ingresos","Evitar clientes","Dejar de cocinar"],1,"🍽️ 👩‍🍳","Varias líneas de venta pueden diversificar los ingresos."],["Fuentes de ingresos","Un negocio tiene muchas visitas, pero pocas ventas. ¿Qué debe medir?",["Solo los seguidores","La conversión de visitas en compras","La edad del edificio","El tamaño del almacén"],1,"📈 💶","Las visitas no son ingresos si no generan ventas."]],[["Recursos clave","Una consultora de datos quiere comenzar. ¿Qué recurso es especialmente importante?",["Conocimiento y herramientas de análisis","Un escaparate enorme","Una flota de camiones","Un escenario"],0,"💻 🧠","Los conocimientos y herramientas permiten prestar el servicio."],["Recursos clave","Una panadería pierde su horno principal. ¿Qué recurso ha fallado?",["Un canal publicitario","Un recurso físico esencial","Una relación comercial","Un segmento de clientes"],1,"🥖 🔥","El equipo de producción puede ser un recurso clave."],["Recursos clave","Un negocio depende de una única persona que conoce todos los procesos. ¿Qué conviene hacer?",["Ocultar la información","Documentar procesos y formar al equipo","Eliminar los manuales","Dejar de contratar"],1,"👥 📋","Compartir conocimiento reduce dependencias críticas."],["Recursos clave","Una empresa desarrolla software propio. ¿Qué recurso debe proteger?",["Solo los muebles","Código, conocimiento y derechos correspondientes","Las tazas de café","El color de las paredes"],1,"💻 🔐","El software y el conocimiento pueden ser activos esenciales."],["Recursos clave","Un taller de costura recibe más encargos de los que puede atender. ¿Qué debe evaluar?",["Solo nuevas redes sociales","Capacidad, personal y máquinas disponibles","Cambiar el nombre","Reducir toda la calidad"],1,"🧵 ⚙️","La capacidad productiva depende de recursos suficientes."]],[["Actividades clave","Una traductora profesional recibe un encargo. ¿Qué actividad genera valor directamente?",["Traducir y revisar el texto","Pintar la oficina","Comprar decoración","Organizar una fiesta"],0,"📖 ✍️","La traducción y revisión son actividades esenciales."],["Actividades clave","Una tienda online tiene muchos pedidos equivocados. ¿Qué actividad debe mejorar?",["El control y preparación de pedidos","La música de la web","El tamaño del logotipo","Las vacaciones del proveedor"],0,"📦 🔍","Preparar pedidos correctamente es una actividad operativa clave."],["Actividades clave","Una academia recibe malas valoraciones por clases desactualizadas. ¿Qué debería priorizar?",["Actualizar contenidos y métodos","Cambiar las cortinas","Comprar más anuncios","Cerrar las encuestas"],0,"🎓 📚","Actualizar la enseñanza mantiene la calidad del servicio."],["Actividades clave","Un servicio de limpieza crece rápidamente. ¿Qué actividad no puede descuidar?",["Supervisión y control de calidad","Cambiar cada semana de marca","Publicar memes","Comprar un edificio"],0,"🧹 ✅","La calidad debe mantenerse al aumentar la actividad."],["Actividades clave","Una aplicación tiene fallos que impiden usarla. ¿Qué tarea debe priorizar el equipo?",["Añadir adornos","Corregir errores y probar","Crear más eslóganes","Cambiar el fondo cada día"],1,"📱 🛠️","Mantener el servicio funcionando es una actividad esencial."]],[["Socios clave","Una asociación organiza talleres en un centro de mayores. ¿Qué representa el centro?",["Un socio colaborador","Una fuente de impuestos","Un ingreso automático","Una patente"],0,"🤝 🏡","Un socio puede facilitar acceso, espacios o recursos."],["Socios clave","Una tienda pequeña necesita entregas a domicilio. ¿Con quién puede colaborar?",["Con una empresa de reparto","Solo con su competencia","Con nadie","Con un fabricante de pinturas"],0,"🏪 🚚","Un aliado logístico puede ampliar la capacidad de entrega."],["Socios clave","Una academia quiere impartir formación certificada. ¿Qué debe comprobar de sus colaboradores?",["Solo su logotipo","Competencia y acreditaciones necesarias","Su número de seguidores","El color de sus oficinas"],1,"🎓 🤝","Las alianzas deben cumplir requisitos y aportar confianza."],["Socios clave","Una cooperativa agrícola necesita distribuir sus productos. ¿Qué alianza puede ayudar?",["Una red local de comercios","Una empresa sin relación","Solo una agencia de publicidad","Un taller mecánico lejano"],0,"🌾 🛒","Los distribuidores adecuados acercan el producto al mercado."],["Socios clave","Una empresa depende de un único proveedor. ¿Qué riesgo debe gestionar?",["Exceso de publicidad","Interrupción del suministro","Demasiados clientes satisfechos","Mejor comunicación"],1,"🏭 ⚠️","Diversificar proveedores puede reducir riesgos operativos."]],[["Estructura de costes","Una cafetería paga alquiler todos los meses. ¿Qué tipo de coste suele ser?",["Coste fijo","Ingreso variable","Donación","Beneficio"],0,"☕ 🏠","El alquiler suele mantenerse aunque cambien las ventas."],["Estructura de costes","Una pastelería vende más tartas y compra más ingredientes. ¿Qué costes aumentan?",["Los costes variables","Las aportaciones de socios","Los ingresos bancarios","Las patentes"],0,"🎂 🧈","Los ingredientes suelen variar con la producción."],["Estructura de costes","Una tienda vende mucho, pero apenas gana dinero. ¿Qué debe revisar?",["Ingresos, costes y márgenes","Solo el número de seguidores","El color de la fachada","Las fotos antiguas"],0,"📊 💶","Vender mucho no garantiza rentabilidad."],["Estructura de costes","Un negocio compra maquinaria muy cara antes de validar la demanda. ¿Qué riesgo asume?",["Inversión prematura","Exceso de clientes","Coste cero","Ingresos garantizados"],0,"⚙️ ⚠️","Conviene validar la demanda antes de asumir grandes costes."],["Estructura de costes","Una empresa paga tres herramientas que hacen lo mismo. ¿Qué decisión es razonable?",["Revisar y consolidar suscripciones","Contratar tres más","Ignorar las facturas","Eliminar toda la tecnología"],0,"💻 🧾","Revisar gastos duplicados puede mejorar la eficiencia."]]];
+const preguntas=bancoPractico.map(grupo=>grupo[Math.floor(Math.random()*grupo.length)]);
+const clave="riw-canvasear-local-v03";
+let indice=0,aciertos=0,respondida=false;let errores=0;
+// RIW-SEGUNDA-OPORTUNIDAD-037
+const $=id=>document.getElementById(id);
+const guardado=JSON.parse(localStorage.getItem(clave)||"{}");
+
+function guardar(){
+const datos={};
+document.querySelectorAll("textarea").forEach(t=>datos[t.dataset.bloque]=t.value);
+localStorage.setItem(clave,JSON.stringify(datos));
+}
+
+// RIW-NOTAS-APRENDIZAJE-044
+const claveNotas = clave + "-notas-v044";
+
+function leerNotas() {
+  try {
+    const datos = JSON.parse(
+      localStorage.getItem(claveNotas) || "[]"
+    );
+    return Array.isArray(datos) ? datos : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+let notasAprendizaje = leerNotas();
+
+function persistirNotas() {
+  localStorage.setItem(
+    claveNotas,
+    JSON.stringify(notasAprendizaje)
+  );
+}
+
+function renderizarNotas(bloque, contenedor) {
+  contenedor.replaceChildren();
+
+  const titulo = document.createElement("h4");
+  titulo.textContent = "📒 Notas guardadas del juego";
+  contenedor.appendChild(titulo);
+
+  const notas = notasAprendizaje.filter(
+    n => n.bloque === bloque
+  );
+
+  if (!notas.length) {
+    const vacio = document.createElement("p");
+    vacio.className = "riw-notas-vacias";
+    vacio.textContent = "Todavía no hay aprendizajes guardados.";
+    contenedor.appendChild(vacio);
+    return;
+  }
+
+  notas.forEach(nota => {
+    const tarjeta = document.createElement("div");
+    tarjeta.className = "riw-nota";
+
+    const etiqueta = document.createElement("label");
+    etiqueta.textContent = nota.pregunta;
+
+    const editor = document.createElement("textarea");
+    editor.value = nota.texto;
+    editor.setAttribute(
+      "aria-label",
+      "Editar aprendizaje guardado"
+    );
+
+    editor.addEventListener("input", () => {
+      nota.texto = editor.value;
+      try {
+        persistirNotas();
+      } catch (e) {
+        console.error("No se pudo guardar la nota", e);
+      }
+    });
+
+    const eliminar = document.createElement("button");
+    eliminar.type = "button";
+    eliminar.className = "riw-eliminar-nota";
+    eliminar.textContent = "Eliminar nota";
+
+    eliminar.addEventListener("click", () => {
+      if (!confirm("¿Eliminar esta nota guardada?")) return;
+
+      const anteriores = notasAprendizaje;
+      notasAprendizaje = anteriores.filter(
+        n => n.id !== nota.id
+      );
+
+      try {
+        persistirNotas();
+        renderizarNotas(bloque, contenedor);
+      } catch (e) {
+        notasAprendizaje = anteriores;
+        alert("No se pudo eliminar la nota.");
+      }
+    });
+
+    tarjeta.append(etiqueta, editor, eliminar);
+    contenedor.appendChild(tarjeta);
+  });
+}
+
+function guardarAprendizaje() {
+  if (!respondida) return;
+
+  const p = preguntas[indice];
+  const id = JSON.stringify([p[0], p[1]]);
+  const boton = document.getElementById(
+    "guardar-aprendizaje"
+  );
+
+  if (notasAprendizaje.some(n => n.id === id)) {
+    if (boton) {
+      boton.textContent = "✓ Ya guardado";
+      boton.disabled = true;
+    }
+    return;
+  }
+
+  const nota = {
+    id: id,
+    bloque: p[0],
+    pregunta: p[1],
+    texto: p[2][p[3]] + "\n\n" + p[5]
+  };
+
+  notasAprendizaje.push(nota);
+
+  try {
+    persistirNotas();
+  } catch (e) {
+    notasAprendizaje.pop();
+    alert("No se pudo guardar el aprendizaje.");
+    return;
+  }
+
+  document.querySelectorAll(".riw-notas").forEach(
+    contenedor => {
+      if (contenedor.dataset.bloque === p[0]) {
+        renderizarNotas(p[0], contenedor);
+      }
+    }
+  );
+
+  if (boton) {
+    boton.textContent = "✓ Guardado en mi Canvas";
+    boton.disabled = true;
+  }
+}
+
+function mostrarBotonAprendizaje() {
+  document.getElementById(
+    "guardar-aprendizaje"
+  )?.remove();
+
+  const p = preguntas[indice];
+  const id = JSON.stringify([p[0], p[1]]);
+  const existe = notasAprendizaje.some(n => n.id === id);
+
+  const boton = document.createElement("button");
+  boton.type = "button";
+  boton.id = "guardar-aprendizaje";
+  boton.textContent = existe
+    ? "✓ Ya guardado"
+    : "📝 Guardar en mi Canvas";
+  boton.disabled = existe;
+  boton.addEventListener("click", guardarAprendizaje);
+
+  document.getElementById("resultado")
+    .insertAdjacentElement("afterend", boton);
+}
+
+function crearCanvas(){
+$("canvas").innerHTML="";
+preguntas.forEach((p,i)=>{
+const cont=document.createElement("div");
+cont.innerHTML="<h3>"+(i+1)+". "+p[0]+"</h3>";
+const t=document.createElement("textarea");
+t.dataset.bloque=p[0];
+t.value=guardado[p[0]]||"";
+t.placeholder="¿Cómo se aplica este bloque a mi idea de negocio?";
+t.addEventListener("input",guardar);
+cont.appendChild(t);
+const cajaNotas = document.createElement("div");
+cajaNotas.className = "riw-notas";
+cajaNotas.dataset.bloque = p[0];
+renderizarNotas(p[0], cajaNotas);
+cont.appendChild(cajaNotas);
+$("canvas").appendChild(cont);
+});
+}
+function mostrar(){
+document.getElementById("guardar-aprendizaje")?.remove();
+respondida=false;
+document.body.classList.remove("respuesta-completada");
+errores=0;
+const p=preguntas[indice];
+$("bloque").textContent=p[0];
+$("contador").textContent="Desafío "+(indice+1)+" de "+preguntas.length;
+$("pregunta").textContent=p[1];
+$("visual").innerHTML=p[4]?
+'<div class="visual" aria-label="Pista visual">'+p[4]+'</div>':"";
+$("resultado").textContent="";
+$("siguiente").disabled=true;
+$("siguiente").textContent=indice===preguntas.length-1?"Ver resultado":"Siguiente desafío";
+$("opciones").innerHTML="";
+p[2].forEach((op,i)=>{
+const b=document.createElement("button");
+b.className="opcion";
+b.textContent=(i+1)+". "+op;
+b.onclick=()=>responder(i);
+$("opciones").appendChild(b);
+});
+}
+function responder(eleccion){
+if(respondida)return;
+
+const p=preguntas[indice];
+const botones=[...document.querySelectorAll(".opcion")];
+const correcto=eleccion===p[3];
+
+if(!correcto){
+  errores++;
+  botones[eleccion].disabled=true;
+  botones[eleccion].classList.add("incorrecta");
+
+  if(errores===1){
+    $("resultado").textContent="No es esa. ¡Prueba otra!";
+    return;
+  }
+}
+
+respondida=true;
+
+if(correcto)aciertos++;
+
+botones.forEach((b,i)=>{
+  b.disabled=true;
+  if(i===p[3])b.classList.add("correcta");
+});
+
+$("resultado").textContent=
+  (correcto?"¡Correcto!":"Esta vez no. Veamos por qué.")
+  +"\n"+p[5];
+
+document.body.classList.add("respuesta-completada");
+mostrarBotonAprendizaje();
+$("siguiente").disabled=false;
+}
+function avanzar(){
+if(indice<preguntas.length-1){indice++;mostrar();return;}
+document.getElementById("guardar-aprendizaje")?.remove();
+$("bloque").textContent="¡Partida terminada!";
+$("contador").textContent="Resultado: "+aciertos+" de 9 aciertos";
+$("pregunta").textContent="Tu Canvas sigue disponible abajo.";
+$("visual").innerHTML="";
+$("opciones").innerHTML="";
+$("resultado").textContent="Puedes revisar tus ideas y guardarlas como PDF.";
+$("siguiente").textContent="Jugar otra vez";
+$("siguiente").disabled=false;
+$("siguiente").onclick=()=>location.reload();
+}
+function exportar(){
+guardar();
+const datosCanvas=JSON.parse(
+  localStorage.getItem(clave)||"{}"
+);
+datosCanvas._notasAprendizaje = notasAprendizaje;
+const contenido=JSON.stringify(datosCanvas,null,2);
+const archivo=new Blob([contenido],{type:"application/json"});
+const url=URL.createObjectURL(archivo);
+const a=document.createElement("a");
+a.href=url;
+a.download="mi-canvas-riw.json";
+a.click();
+setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+crearCanvas();
+mostrar();
+
+function cambiarVista(vista) {
+document.body.classList.toggle("vista-canvas", vista==="canvas");
+
+  if (vista !== "juego" && vista !== "canvas") return;
+  const main = document.getElementById("contenido-principal");
+  main.dataset.vista = vista;
+  document.querySelectorAll(".pestana").forEach(b => {
+    const activa = b.dataset.vista === vista;
+    b.classList.toggle("activa", activa);
+    b.setAttribute("aria-pressed", String(activa));
+  });
+}
+
+
+const bloquesIntro = [
+  ["👥","Clientes"],["💡","Valor"],["📣","Canales"],
+  ["🤝","Relaciones"],["💶","Ingresos"],["🧰","Recursos"],
+  ["⚙️","Actividades"],["🌐","Socios"],["📊","Costes"]
+];
+const tonosIntro = [
+  "#e5eedc","#f5d68b","#f8dfd3",
+  "#dceae8","#f7e8bb","#e9e1f2",
+  "#e5eedc","#dceae8","#f8dfd3"
+];
+const rejillaIntro = document.getElementById("intro-grid");
+
+bloquesIntro.forEach(([emoji, nombre], i) => {
+  const tarjeta = document.createElement("div");
+  tarjeta.className = "intro-tile";
+  tarjeta.textContent = nombre;
+  const simbolo = document.createElement("span");
+  simbolo.textContent = emoji;
+  tarjeta.prepend(simbolo);
+  tarjeta.style.setProperty("--vuelo", (i * .12) + "s");
+  tarjeta.style.setProperty("--color", (1.15 + i * .13) + "s");
+  tarjeta.style.setProperty("--x", ((i % 3) - 1) * 95 + "px");
+  tarjeta.style.setProperty("--y", (i < 3 ? -75 : i > 5 ? 75 : 0) + "px");
+  tarjeta.style.setProperty("--r", (i % 2 ? 12 : -12) + "deg");
+  tarjeta.style.setProperty("--fondo", tonosIntro[i]);
+  rejillaIntro.appendChild(tarjeta);
+});
+
+function iniciarDesdeIntro() {
+  document.body.classList.add("iniciado");
+  window.scrollTo(0, 0);
+}
+document.getElementById("intro-iniciar")
+  .addEventListener("click", iniciarDesdeIntro);
+
+document.getElementById("intro-saltar")
+  .addEventListener("click", () => {
+    document.querySelectorAll(".intro-tile").forEach(t => {
+      t.style.animation = "none";
+      t.style.background = t.style.getPropertyValue("--fondo");
+    });
+    document.getElementById("intro-iniciar").focus();
+  });
+
+</script>
+</body>
+</html>

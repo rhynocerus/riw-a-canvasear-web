@@ -1,0 +1,19 @@
+# Respaldos locales
+*.bak
+*.bak-*
+
+# Archivos temporales
+*~
+*.swp
+*.tmp
+
+# Archivos privados y de entorno
+.env
+.env.*
+*.key
+*.pem
+
+# Configuración local
+.vscode/
+.idea/
+__pycache__/
